@@ -34,6 +34,7 @@ class Button:
 class App:
     def __init__(self) -> None:
         pyxel.init(256, 256, title="Jogoune")
+        self.finish = False
         
         self.one = 0
         self.two = 0
@@ -51,10 +52,10 @@ class App:
         self.buttonChat5 = Button(220, 170, 0, 128, 80, 32, 32)
 
 
-        self.buttonNewCat = Button(0, 0, 1, 0, 0, 32, 32)
-        self.buttonLife = Button(0, 0, 1, 32, 0, 32, 32)
-        self.buttonMoney = Button(0, 0, 1, 64, 0, 32, 32)
-        self.buttonDamage = Button(0, 0, 1, 96, 0, 32, 32)
+        self.buttonNewCat = Button(0, 0, 1, 32, 0, 32, 32)
+        self.buttonLife = Button(0, 0, 1, 64, 0, 32, 32)
+        self.buttonMoney = Button(0, 0, 1, 96, 0, 32, 32)
+        self.buttonDamage = Button(0, 0, 1, 0, 0, 32, 32)
         self.buttonSpeed = Button(0, 0, 1, 128, 0, 32, 32)
 
         self.buff = [self.buttonNewCat, self.buttonLife, self.buttonMoney, self.buttonDamage, self.buttonSpeed]
@@ -70,6 +71,9 @@ class App:
         self.running = True
 
         self.money_add = 100
+        self.life_add = 0
+        self.speed_add = 0
+        self.damage_add = 0
 
         pyxel.run(self.update, self.draw)
 
@@ -97,12 +101,17 @@ class App:
                 self.money = 150
                 self.type *= 1.5
                 self.tour = Tower(self.liste_chat, self.type)
-            
+                if self.lvl == 11:
+                    self.finish = True
         self.event()
 
     # Méthode qui se lance 30 fois par seconde
     def draw(self):
-        if self.running:
+        if self.finish:
+            pyxel.cls(0)
+            pyxel.text(10, 10, "You win your chest ! A famous chest for you !\n :D You can replay the game to try to unlock a rarest chest !", 7)
+            pyxel.blt(100, 100, 0, 48, 144, 64, 64, 2)
+        elif self.running:
             pyxel.bltm(0,0,0,0,0,256,256)
             pyxel.text(30, 220, f"{self.one}", 0)
             pyxel.text(80, 220, f"{self.two}", 0)
@@ -118,18 +127,17 @@ class App:
             pyxel.bltm(0,0,0,256,0,256,256)
             pyxel.text(10, 10, "You win !", 7)
 
+            pyxel.rect(45, 17, 47, 12, 0)
             pyxel.text(50, 20, "Path 1 :", 7)
             self.buff[0].x = 50
-            self.buff[0].y = 100
+            self.buff[0].y = 80
             self.buff[0].draw()
 
-            pyxel.text(160, , "Path 2 : ", 7)
-            self.buff[1].x = 130
-            self.buff[1].y = 100
+            pyxel.rect(175, 17, 47, 12, 0)
+            pyxel.text(180, 20, "Path 2 : ", 7)
+            self.buff[1].x = 175
+            self.buff[1].y = 80
             self.buff[1].draw()
-        if not self.running and self.lvl == 10:
-            pyxel.cls(0)
-            pyxel.text(10, 10, "You win your chest ! A famous chest for you ! :D You can replay the game to try to unlock a rarest chest !")
             
     
     def show_cats(self):
@@ -158,31 +166,31 @@ class App:
 
     def event(self):
         if self.buttonChat1.click() and self.buttonChat1 in self.chatdebloquer and self.money >= 100:
-            chat1 = Chat_1()
+            chat1 = Chat_1(self.life_add, self.speed_add, self.damage_add)
             self.liste_chat.append(chat1)
             chat1.spawn()
             self.money -= 100
             self.one += 1                
         if self.buttonChat2.click() and self.buttonChat2 in self.chatdebloquer and self.money >= 225:
-            chat2 = Chat_2()
+            chat2 = Chat_2(self.life_add, self.speed_add, self.damage_add)
             self.liste_chat.append(chat2)
             chat2.spawn()
             self.money -= 225
             self.two += 1
         if self.buttonChat3.click() and self.buttonChat3 in self.chatdebloquer and self.money >= 300:
-            chat3 = Chat_3()
+            chat3 = Chat_3(self.life_add, self.speed_add, self.damage_add)
             self.liste_chat.append(chat3)
             chat3.spawn()
             self.money -= 300
             self.three += 1
         if self.buttonChat4.click() and self.buttonChat4 in self.chatdebloquer and self.money >= 500:
-            chat4 = Chat_4()
+            chat4 = Chat_4(self.life_add, self.speed_add, self.damage_add)
             self.liste_chat.append(chat4)
             chat4.spawn()
             self.money -= 500
             self.four += 1
         if self.buttonChat5.click() and self.buttonChat5 in self.chatdebloquer and self.money >= 1000:
-            chat5 = Chat_5()
+            chat5 = Chat_5(self.life_add, self.speed_add, self.damage_add)
             self.liste_chat.append(chat5)
             chat5.spawn()
             self.money -= 1000
@@ -227,11 +235,7 @@ class App:
             self.three = 0
             self.four = 0
             self.five = 0
-            Chat_1().damage += (Chat_1().damage)//2
-            Chat_2().damage += (Chat_2().damage)//2
-            Chat_3().damage += (Chat_3().damage)//2
-            Chat_4().damage += (Chat_4().damage)//2
-            Chat_5().damage += (Chat_5().damage)//2
+            self.damage_add += 20
             self.running = True
         if not self.running and self.buttonLife.click() and self.buttonLife in self.buff[:2]:
             print("Plus de vie")
@@ -241,11 +245,7 @@ class App:
             self.four = 0
             self.five = 0
             self.running = True
-            Chat_1().life += (Chat_1().life)//2
-            Chat_2().life += (Chat_2().life)//2
-            Chat_3().life += (Chat_3().life)//2
-            Chat_4().life += (Chat_4().life)//2
-            Chat_5().life += (Chat_5().life)//2
+            self.life_add += 500
         if not self.running and self.buttonSpeed.click() and self.buttonSpeed in self.buff[:2]:
             print("Plus de vitesse")
             self.one = 0
@@ -254,11 +254,7 @@ class App:
             self.four = 0
             self.five = 0
             self.running = True
-            Chat_1().speed += 0.3
-            Chat_2().speed += 0.3
-            Chat_3().speed += 0.3
-            Chat_4().speed += 0.3
-            Chat_5().speed += 0.3
+            self.speed_add += 0.3
         
 
 class Tower():
@@ -280,28 +276,29 @@ class Tower():
         xmin = self.x
         xmax = self.x - self.zone
         liste = []
+        tank = False
+        for chat in self.chats:
+            if chat.id == 1 :
+                tank = True
         for chat in self.chats:
             if chat.x <= xmin and chat.x >= xmax:
-                liste.append(chat.id)
-        if 1 in liste:
-            for chat in self.chats:
-                if chat.id == 1:
+                if tank == True:
+                    if chat.id == 1 :
+                        chat.life -= self.damage * 1.5
+                else:
                     chat.life -= self.damage
-        else:
-            for chat in self.chats:
-                chat.life -= self.damage
         
     
 
 class Chat_1():
-    def __init__(self) -> None:
+    def __init__(self, life, speed, damage) -> None:
         self.id = 1
         self.x = 0
         self.y = 100
-        self.speed = 0.8
+        self.speed = 0.8 + speed
         self.distance = 10
-        self.damage = 10
-        self.life = 1500
+        self.damage = 10 + damage
+        self.life = 1500 + life
         self.color = 1
         self.money = 100
     
@@ -315,19 +312,20 @@ class Chat_1():
             tour.life -= self.damage
 
 class Chat_2():
-    def __init__(self) -> None:
+    def __init__(self, life, speed, damage) -> None:
         self.id = 2
         self.x = 0
         self.y = 100
-        self.speed = 1.3
+        self.speed = 1.3 + speed
         self.distance = 10
-        self.damage = 100
-        self.life = 500
+        self.damage = 100 + damage
+        self.life = 500 + life
         self.color = 2
         self.money = 225
     
     def spawn(self):
-        pyxel.rect(self.x, 100, 32, 32, self.color)
+        pyxel.blt(self.x, self.y, 0, 32, 48, 32, 32, 2)
+        pyxel.text(self.x, self.y-10, f"{self.life}", 4)
     
     def attack(self, tour):
         time = pyxel.frame_count
@@ -335,19 +333,20 @@ class Chat_2():
             tour.life -= self.damage
 
 class Chat_3():
-    def __init__(self) -> None:
+    def __init__(self, life, speed, damage) -> None:
         self.id = 3
         self.x = 0
         self.y = 100
-        self.speed = 1.5
+        self.speed = 1.5 + speed
         self.distance = 2.5
-        self.damage = 250
-        self.life = 500
+        self.damage = 250 + damage
+        self.life = 500 + life
         self.color = 3
         self.money = 300
     
     def spawn(self):
-        pyxel.rect(self.x, 100, 32, 32, self.color)
+        pyxel.blt(self.x, self.y, 0, 64, 48, 32, 32, 2)
+        pyxel.text(self.x, self.y-10, f"{self.life}", 4)
     
     def attack(self, tour):
         time = pyxel.frame_count
@@ -355,19 +354,20 @@ class Chat_3():
             tour.life -= self.damage
 
 class Chat_4():
-    def __init__(self) -> None:
+    def __init__(self, life, speed, damage) -> None:
         self.id = 4
         self.x = 0
         self.y = 100
-        self.speed = 2
+        self.speed = 2 + speed
         self.distance = 35
-        self.damage = 100
-        self.life = 200
+        self.damage = 100 + damage
+        self.life = 200 + life
         self.color = 4
         self.money = 500
     
     def spawn(self):
-        pyxel.rect(self.x, 100, 32, 32, self.color)
+        pyxel.blt(self.x, self.y, 0, 96, 48, 32, 32, 2)
+        pyxel.text(self.x, self.y-10, f"{self.life}", 4)
     
     def attack(self, tour):
         time = pyxel.frame_count
@@ -375,20 +375,21 @@ class Chat_4():
             tour.life -= self.damage
 
 class Chat_5():
-    def __init__(self) -> None:
+    def __init__(self, life, speed, damage) -> None:
         self.name = "Nyan Cat ^^"
         self.id = 5
         self.x = 0
         self.y = 100
-        self.speed = 0.4
+        self.speed = 0.4 + speed
         self.distance = 25
-        self.damage = 1000
-        self.life = 3000
+        self.damage = 1000 + damage
+        self.life = 3000 + life
         self.color = 5
         self.money = 1000
     
     def spawn(self):
-        pyxel.rect(self.x, 100, 32, 32, self.color)
+        pyxel.blt(self.x, self.y, 0, 128, 48, 32, 32, 2)
+        pyxel.text(self.x, self.y-10, f"{self.life}", 4)
     
     def attack(self, tour):
         time = pyxel.frame_count
